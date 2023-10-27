@@ -1,8 +1,10 @@
 
 import random
-import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch
+import torch.nn.functional as F
+import numpy as np
 
 
 def read_triples_from_file(filename):
@@ -48,17 +50,9 @@ print(num_entities , num_relations)
 embedding_dim = 50
 
 
-# def initialize_weights(embedding):
-#     nn.init.uniform_(embedding.weight.data, -0.05, 0.05)
-
 # Create embedding layers
 entity_embeddings = nn.Embedding(num_entities, embedding_dim)
 relation_embeddings = nn.Embedding(num_relations, embedding_dim)
-
-# # Initialize weights
-# initialize_weights(entity_embeddings)
-# initialize_weights(relation_embeddings)
-
 
 all_entity_indices = list(range(num_entities))
 
@@ -110,66 +104,18 @@ def complex_num(embedding, x_samples):
     real_part = (embedding * torch.cos(x_samples.unsqueeze(-1))).sum(-1)
     imag_part = (embedding * torch.sin(x_samples.unsqueeze(-1))).sum(-1)
 
-    # Combine real and imaginary parts
-    # complex_representation = torch.stack((real_part, imag_part), dim=-1)  # Shape: [x_samples, 2]
     # Aggregate real and imaginary parts
     complex_representation = real_part + imag_part # Shape: [x_samples]
 
     return complex_representation
 
-import torch
-import torch.nn.functional as F
-import numpy as np
 
-# k = int(np.sqrt(embedding_dim // 2))
+# class Mish(torch.nn.Module):
+#     def __init__(self):
+#         super().__init__()
 
-# def neural_network(weights, x):
-#   n = len(weights)
-#   # Weights for two linear layers.
-#   w1, w2 = torch.hsplit(weights, 2)
-#   # (1) Construct two-layered neural network
-#   w1 = w1.view(n, k, k)
-#   w2 = w2.view(n, k, k)
-#   # (2) Forward Pass
-#   out1 = torch.tanh(w1 @ x)  # torch.sigmoid => worse results
-#   out2 = w2 @ out1
-  # return out2
-
-    # num_hidden_layers = 4
-    # layers = [nn.Linear(embedding.size(0), embedding.size(0)) for _ in range(num_hidden_layers)]
-
-    # def network():
-    #     x = embedding + x_samples
-    #     for layer in layers:
-    #         x = torch.tanh(layer(x))
-    #     return x
-
-    # return network()
-
-# def neural_network(input_embedding, x):
-#     input_embedding = input_embedding.unsqueeze(0)  # Adds a dimension, new shape: [1, 50]
-#     x = x.unsqueeze(0)  # Adds a dimension, new shape: [1, 50]
-
-#     combined_input = torch.cat((input_embedding, x), dim=1)  # Concatenates along the new dimension, new shape: [1, 100]
-
-#     input_dim = combined_input.size(1)  # Now input_dim will be 100
-
-#     fc1 = nn.Linear(input_dim, input_dim // 2)  # Reducing dimensionality to [1, 50] in the first layer
-#     fc2 = nn.Linear(input_dim // 2, input_dim // 2)  # Keeping dimensionality at [1, 50] in the second layer
-
-#     out1 = torch.relu(fc1(combined_input))
-#     out2 = fc2(out1)
-
-#     return out2.squeeze(0)  # Removing the extra dimension, returning tensor of shape [50]
-
-import torch.nn.functional as F
-
-class Mish(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        return x * torch.tanh(F.softplus(x))
+#     def forward(self, x):
+#         return x * torch.tanh(F.softplus(x))
 
 class NeuralNet(nn.Module):
 
@@ -195,59 +141,35 @@ class NeuralNet(nn.Module):
     self.fc3 = nn.Linear(l3_dim, l4_dim)
     self.fc4 = nn.Linear(l4_dim, output_dim)
 
-  def forward(self, input_embedding, x):
-    combined_input = torch.cat((input_embedding.unsqueeze(0), x.unsqueeze(0)), dim=1)  # Shape: [1, 100]
-    out = Mish()(self.fc1(combined_input))
-    out = Mish()(self.fc2(out))
-    out = Mish()(self.fc3(out))
-    out = self.fc4(out)
-    return out.squeeze(0)  # Shape: [50]
-
   # def forward(self, input_embedding, x):
+  #   combined_input = torch.cat((input_embedding.unsqueeze(0), x.unsqueeze(0)), dim=1)  # Shape: [1, 100]
+  #   out = Mish()(self.fc1(combined_input))
+  #   out = Mish()(self.fc2(out))
+  #   out = Mish()(self.fc3(out))
+  #   out = self.fc4(out)
+  #   return out.squeeze(0)  # Shape: [50]
 
+  def forward(self, input_embedding, x):
 
-    # # Layer 1
-    # out1 = torch.tanh(self.fc1(x))
+    # Layer 1
+    out1 = torch.tanh(self.fc1(x))
 
-    # # Layer 2
-    # out2 = torch.tanh(self.fc2(out1))
+    # Layer 2
+    out2 = torch.tanh(self.fc2(out1))
 
-    # # Layer 3
-    # out3 = torch.tanh(self.fc3(out2))
+    # Layer 3
+    out3 = torch.tanh(self.fc3(out2))
 
-    # # Layer 4
-    # out4 = self.fc4(out3)
+    # Layer 4
+    out4 = self.fc4(out3)
 
-    # return out4
-
-# class NeuralNet(nn.Module):
-
-#   def __init__(self, input_dim, output_dim):
-#     super().__init__()
-#     self.fc1 = nn.Linear(input_dim, input_dim // 2)
-#     self.fc2 = nn.Linear(input_dim // 2, output_dim)
-#     self.fc3 = nn.Linear(input_dim // 2, output_dim)
-
-#   def forward(self, input_embedding, x):
-
-#     # Combine the two vectors (no unsqueeze)
-#     combined = torch.cat((input_embedding, x), dim=0)
-
-#     # Pass through layers
-#     out1 = torch.tanh(self.fc1(combined))
-#     out2 = self.fc2(out1)
-
-#     return out2
+    return out4
 
 neural_network = NeuralNet(100, 50)
 
 def compute_score(h_idx, r_idx, t_idx):
 
     x_samples = torch.linspace(-1, 1, 50)
-
-    # h_emb_idx = entity_to_index[h_idx]
-    # r_emb_idx = relation_to_index[r_idx]
-    # t_emb_idx = entity_to_index[t_idx]
 
     h = entity_embeddings(torch.tensor([h_idx]))[0]
     r = relation_embeddings(torch.tensor([r_idx]))[0]
@@ -330,7 +252,6 @@ def compute_loss(positive_score, negative_score):
     loss = criterion(positive_score, negative_score, y)
     return loss
 
-import torch.nn.functional as F
 
 def calculate_loss_BCELogistLoss(pos_scores, neg_scores):
     # Convert scores to probabilities
