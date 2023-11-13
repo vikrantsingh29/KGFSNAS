@@ -179,7 +179,7 @@ def compute_score(h_idx, r_idx, t_idx):
     ft = FUNCTION_MAP[FUNCTION_SPACE](t, x_samples)
     fhx = FUNCTION_MAP[FUNCTION_SPACE](fh, x_samples)
     h_r_combined = h * r  # element-wise multiplication of h and r
-    frh = FUNCTION_MAP[FUNCTION_SPACE](h_r_combined, x_samples)
+    frh = FUNCTION_MAP[FUNCTION_SPACE](r, fh)
 
     score = torch.trapz(frh * ft, x_samples, dim=0)
 
