@@ -19,7 +19,7 @@ def read_triples_from_file(filename):
 
 
 
-path = 'C:\\Users\\vikrant.singh\\PycharmProjects\\NASKG\\Countries-S1'
+path = 'C:\\Users\\vikrant.singh\\PycharmProjects\\KGFSNAS\\UMLS'
 train_triples_string = read_triples_from_file(path + '\\train.txt')
 test_triples_string = read_triples_from_file(path + '\\test.txt')
 valid_triples_string = read_triples_from_file(path + '\\valid.txt')
@@ -164,12 +164,12 @@ import numpy as np
 
 import torch.nn.functional as F
 
-class Mish(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        return x * torch.tanh(F.softplus(x))
+# class Mish(torch.nn.Module):
+#     def __init__(self):
+#         super().__init__()
+#
+#     def forward(self, x):
+#         return x * torch.tanh(F.softplus(x))
 
 class NeuralNet(nn.Module):
 
@@ -195,30 +195,30 @@ class NeuralNet(nn.Module):
     self.fc3 = nn.Linear(l3_dim, l4_dim)
     self.fc4 = nn.Linear(l4_dim, output_dim)
 
-  def forward(self, input_embedding, x):
-    combined_input = torch.cat((input_embedding.unsqueeze(0), x.unsqueeze(0)), dim=1)  # Shape: [1, 100]
-    out = Mish()(self.fc1(combined_input))
-    out = Mish()(self.fc2(out))
-    out = Mish()(self.fc3(out))
-    out = self.fc4(out)
-    return out.squeeze(0)  # Shape: [50]
-
   # def forward(self, input_embedding, x):
+  #   combined_input = torch.cat((input_embedding.unsqueeze(0), x.unsqueeze(0)), dim=1)  # Shape: [1, 100]
+  #   out = Mish()(self.fc1(combined_input))
+  #   out = Mish()(self.fc2(out))
+  #   out = Mish()(self.fc3(out))
+  #   out = self.fc4(out)
+  #   return out.squeeze(0)  # Shape: [50]
+
+  def forward(self, input_embedding, x):
 
 
-    # # Layer 1
-    # out1 = torch.tanh(self.fc1(x))
+    # Layer 1
+    out1 = torch.tanh(self.fc1(x))
 
-    # # Layer 2
-    # out2 = torch.tanh(self.fc2(out1))
+    # Layer 2
+    out2 = torch.tanh(self.fc2(out1))
 
-    # # Layer 3
-    # out3 = torch.tanh(self.fc3(out2))
+    # Layer 3
+    out3 = torch.tanh(self.fc3(out2))
 
-    # # Layer 4
-    # out4 = self.fc4(out3)
+    # Layer 4
+    out4 = self.fc4(out3)
 
-    # return out4
+    return out4
 
 # class NeuralNet(nn.Module):
 
